@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Arduino Programming Basics</title>
+
+<style>
+body {
+  font-family: Consolas, Arial, sans-serif;
+  background: #f2f4f7;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+}
+
+.section {
+  background: #ffffff;
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+h2 {
+  color: #1abc9c;
+}
+
+.desc {
+  font-style: italic;
+  color: #555;
+}
+
+.syntax {
+  background: #eef1f5;
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 6px 0;
+}
+
+/* VS Code–like code block */
+pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+/* Simple syntax coloring */
+.keyword { color: #569cd6; }
+.type { color: #4ec9b0; }
+.number { color: #b5cea8; }
+.string { color: #ce9178; }
+.comment { color: #6a9955; }
+
+.copy-btn {
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: #1abc9c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  background: #16a085;
+}
+</style>
+
+<script>
+function copyCode(id) {
+  const code = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(code);
+  alert("Code copied!");
+}
+</script>
+
+</head>
+<body>
+
+<h1>Arduino Programming – Intermidiate </h1>
+
+<!-- Example 1 -->
+<div class="section">
+<h2>Example 1: Potentiometer Reading</h2>
+<p class="desc">Reads analog value from potentiometer and prints it on Serial Monitor.</p>
+
+<pre id="ex1">
+<span class="keyword">void</span> setup() {
+  Serial.begin(<span class="number">9600</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="type">int</span> val = <span class="type">analogRead</span>(A0);
+  Serial.println(val);
+  <span class="type">delay</span>(<span class="number">300</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex1')">Copy Code</button>
+</div>
+
+<!-- Example 2 -->
+<div class="section">
+<h2>Example 2: LED Brightness using Potentiometer</h2>
+<p class="desc">Controls LED brightness using PWM.</p>
+
+<pre id="ex2">
+<span class="type">int</span> led = <span class="number">9</span>;
+
+<span class="keyword">void</span> setup() {
+  pinMode(led, <span class="keyword">OUTPUT</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="type">int</span> v = analogRead(A0);
+  v = map(v, <span class="number">0</span>, <span class="number">1023</span>, <span class="number">0</span>, <span class="number">255</span>);
+  analogWrite(led, v);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex2')">Copy Code</button>
+</div>
+
+<!-- Example 3 -->
+<div class="section">
+<h2>Example 3: 7-Segment Display Counter</h2>
+<p class="desc">Displays numbers 0–9 on a 7-segment display.</p>
+
+<pre id="ex3">
+<span class="type">int</span> seg[] = {2,3,4,5,6,7,8};
+
+<span class="type">byte</span> num[10][7] = {
+{1,1,1,1,1,1,0},{0,1,1,0,0,0,0},{1,1,0,1,1,0,1},
+{1,1,1,1,0,0,1},{0,1,1,0,0,1,1},{1,0,1,1,0,1,1},
+{1,0,1,1,1,1,1},{1,1,1,0,0,0,0},{1,1,1,1,1,1,1},
+{1,1,1,1,0,1,1}
+};
+
+<span class="keyword">void</span> setup() {
+  <span class="keyword">for</span>(<span class="type">int</span> i=0;i&lt;7;i++) pinMode(seg[i],OUTPUT);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="keyword">for</span>(<span class="type">int</span> n=0;n&lt;10;n++){
+    <span class="keyword">for</span>(<span class="type">int</span> i=0;i&lt;7;i++)
+      digitalWrite(seg[i], num[n][i]);
+    delay(<span class="number">700</span>);
+  }
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex3')">Copy Code</button>
+</div>
+
+<!-- Example 4 -->
+<div class="section">
+<h2>Example 4: LCD Display using I2C</h2>
+<p class="desc">Displays text on a 16×2 LCD using I2C communication.</p>
+
+<pre id="exI2C">
+#include &lt;LiquidCrystal_I2C.h&gt;
+
+<span class="comment">// I2C address (commonly 0x27 or 0x3F)</span>
+<span class="comment">// SDA → A4 SCL → A5 </span>
+LiquidCrystal_I2C lcd(<span class="number">0x27</span>, <span class="number">16</span>, <span class="number">2</span>);
+
+<span class="keyword">void</span> setup() {
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(<span class="number">0</span>, <span class="number">0</span>);
+  lcd.print(<span class="string">"Hello Arduino"</span>);
+}
+
+<span class="keyword">void</span> loop() {
+}
+</pre>
+
+<button class="copy-btn" onclick="copyCode('exI2C')">Copy Code</button>
+</div>
+
+
+<!-- Example 5 -->
+<div class="section">
+<h2>Example 5: LCD Counter using I2C</h2>
+<p class="desc">Displays an increasing counter value on a 16×2 I2C LCD every second.</p>
+
+<pre id="exI2C2">
+#include &lt;LiquidCrystal_I2C.h&gt;
+
+LiquidCrystal_I2C lcd(<span class="number">0x27</span>, <span class="number">16</span>, <span class="number">2</span>);
+
+<span class="type">int</span> c = <span class="number">0</span>;
+
+<span class="keyword">void</span> setup() {
+  lcd.init();
+  lcd.backlight();
+}
+
+<span class="keyword">void</span> loop() {
+  lcd.clear();
+  lcd.setCursor(<span class="number">0</span>, <span class="number">0</span>);
+  lcd.print(c++);
+  delay(<span class="number">1000</span>);
+}
+</pre>
+
+<button class="copy-btn" onclick="copyCode('exI2C2')">Copy Code</button>
+</div>
+
+
+<!-- Example 6 -->
+<div class="section">
+<h2>Example 6: Servo Motor Basic</h2>
+<p class="desc">Moves servo to fixed angles.</p>
+
+<pre id="ex6">
+#include &lt;Servo.h&gt;
+Servo s;
+
+<span class="keyword">void</span> setup() {
+  s.attach(<span class="number">9</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  s.write(<span class="number">0</span>);
+  delay(<span class="number">1000</span>);
+  s.write(<span class="number">90</span>);
+  delay(<span class="number">1000</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex6')">Copy Code</button>
+</div>
+
+<!-- Example 7 -->
+<div class="section">
+<h2>Example 7: Servo using Potentiometer</h2>
+<p class="desc">Controls servo angle using potentiometer.</p>
+
+<pre id="ex7">
+#include &lt;Servo.h&gt;
+Servo s;
+
+<span class="keyword">void</span> setup() {
+  s.attach(<span class="number">9</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="type">int</span> v = analogRead(A0);
+  v = map(v,<span class="number">0</span>,<span class="number">1023</span>,<span class="number">0</span>,<span class="number">180</span>);
+  s.write(v);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex7')">Copy Code</button>
+</div>
+
+<!-- Example 8 -->
+<div class="section">
+<h2>Example 8: Ultrasonic Distance Sensor</h2>
+<p class="desc">Measures distance using HC-SR04.</p>
+
+<pre id="ex8">
+<span class="type">int</span> trig=9, echo=10;
+
+<span class="keyword">void</span> setup() {
+  pinMode(trig,OUTPUT);
+  pinMode(echo,INPUT);
+  Serial.begin(<span class="number">9600</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  digitalWrite(trig,LOW);
+  delayMicroseconds(<span class="number">2</span>);
+  digitalWrite(trig,HIGH);
+  delayMicroseconds(<span class="number">10</span>);
+  digitalWrite(trig,LOW);
+  <span class="type">long</span> d = pulseIn(echo,HIGH);
+  Serial.println(d/<span class="number">58</span>);
+  delay(<span class="number">500</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex8')">Copy Code</button>
+</div>
+
+<!-- Example 9 -->
+<div class="section">
+<h2>Example 9: Buzzer ON/OFF</h2>
+<p class="desc">Turns buzzer ON and OFF.</p>
+
+<pre id="ex9">
+<span class="type">int</span> buz = <span class="number">8</span>;
+
+<span class="keyword">void</span> setup() {
+  pinMode(buz,OUTPUT);
+}
+
+<span class="keyword">void</span> loop() {
+  digitalWrite(buz,HIGH);
+  delay(<span class="number">500</span>);
+  digitalWrite(buz,LOW);
+  delay(<span class="number">500</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex9')">Copy Code</button>
+</div>
+
+<!-- Example 10 -->
+<div class="section">
+<h2>Example 10: RGB LED</h2>
+<p class="desc">Controls RGB LED colors.</p>
+
+<pre id="ex10">
+<span class="keyword">void</span> setup() {
+  pinMode(<span class="number">9</span>,OUTPUT);
+  pinMode(<span class="number">10</span>,OUTPUT);
+  pinMode(<span class="number">11</span>,OUTPUT);
+}
+
+<span class="keyword">void</span> loop() {
+  analogWrite(<span class="number">9</span>,<span class="number">255</span>);
+  analogWrite(<span class="number">10</span>,<span class="number">0</span>);
+  analogWrite(<span class="number">11</span>,<span class="number">0</span>);
+  delay(<span class="number">1000</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex10')">Copy Code</button>
+</div>
+
+
+
+</body>
+</html>

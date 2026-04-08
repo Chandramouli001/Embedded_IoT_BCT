@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Arduino Programming Basics</title>
+
+<style>
+body {
+  font-family: Consolas, Arial, sans-serif;
+  background: #f2f4f7;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+}
+
+.section {
+  background: #ffffff;
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+h2 {
+  color: #1abc9c;
+}
+
+.desc {
+  font-style: italic;
+  color: #555;
+}
+
+.syntax {
+  background: #eef1f5;
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 6px 0;
+}
+
+/* VS Code–like code block */
+pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+/* Simple syntax coloring */
+.keyword { color: #569cd6; }
+.type { color: #4ec9b0; }
+.number { color: #b5cea8; }
+.string { color: #ce9178; }
+.comment { color: #6a9955; }
+
+.copy-btn {
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: #1abc9c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  background: #16a085;
+}
+</style>
+
+<script>
+function copyCode(id) {
+  const code = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(code);
+  alert("Code copied!");
+}
+</script>
+
+</head>
+<body>
+
+<h1>Arduino Programming – Basics</h1>
+
+<!-- 1 -->
+<div class="section">
+<h2>1. Structure of Every Arduino Program</h2>
+<p class="desc">Defines the basic structure where setup runs once and loop runs repeatedly.</p>
+
+<pre id="c1">
+<span class="keyword">void</span> setup() {
+  <span class="comment">// initialization code</span>
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="comment">// main code runs repeatedly</span>
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('c1')">Copy Code</button>
+</div>
+
+<!-- 2 -->
+<div class="section">
+<h2>2. Comments</h2>
+<p class="desc">Comments are used to explain code and are ignored by the compiler.</p>
+
+<pre id="c2">
+<span class="comment">// This is a single-line comment</span>
+
+<span class="comment">  /* This is a multi-line comment
+used for explanation /* </span>
+
+</pre>
+<button class="copy-btn" onclick="copyCode('c2')">Copy Code</button>
+</div>
+
+<!-- 3 -->
+<div class="section">
+<h2>3. Variables & Data Types</h2>
+<p class="desc">Variables store data values used in the program.</p>
+<div class="syntax">Syntax: dataType variableName = value;</div>
+
+<pre id="c3">
+<span class="type">int</span> a = <span class="number">10</span>;
+<span class="type">float</span> b = <span class="number">3.14</span>;
+<span class="type">char</span> c = <span class="string">'A'</span>;
+<span class="type">bool</span> d = <span class="keyword">true</span>;
+</pre>
+<button class="copy-btn" onclick="copyCode('c3')">Copy Code</button>
+</div>
+
+<!-- 4 -->
+<div class="section">
+<h2>4. Constants</h2>
+<p class="desc">Constants store fixed values that cannot be changed during execution.</p>
+<div class="syntax">Syntax: const dataType variableName = value;</div>
+
+<pre id="c4">
+<span class="keyword">const</span> <span class="type">int</span> ledPin = <span class="number">13</span>;
+</pre>
+<button class="copy-btn" onclick="copyCode('c4')">Copy Code</button>
+</div>
+
+<!-- 5 -->
+<div class="section">
+<h2>5. pinMode()</h2>
+<p class="desc">Used to configure a pin as INPUT or OUTPUT.</p>
+<div class="syntax">Syntax: pinMode(pin, mode);</div>
+
+<pre id="c5">
+<span class="keyword">void</span> <span class="type">setup</span>() {
+  <span class="type">pinMode</span>(<span class="number">13</span>, <span class="keyword">OUTPUT</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('c5')">Copy Code</button>
+</div>
+
+<!-- 6 -->
+<div class="section">
+<h2>6. digitalWrite()</h2>
+<p class="desc">Sets a digital pin HIGH or LOW.</p>
+<div class="syntax">Syntax: digitalWrite(pin, value);</div>
+
+<pre id="c6">
+<span class="type">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">HIGH</span>);
+<span class="type">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">LOW</span>);
+</pre>
+<button class="copy-btn" onclick="copyCode('c6')">Copy Code</button>
+</div>
+
+<!-- 7 -->
+<div class="section">
+<h2>7. digitalRead()</h2>
+<p class="desc">Reads the state of a digital input pin.</p>
+<div class="syntax">Syntax: digitalRead(pin);</div>
+
+<pre id="c7">
+<span class="type">int</span> value = <span class="type">digitalRead</span>(<span class="number">2</span>);
+</pre>
+<button class="copy-btn" onclick="copyCode('c7')">Copy Code</button>
+</div>
+
+<!-- 8 -->
+<div class="section">
+<h2>8. analogRead()</h2>
+<p class="desc">Reads analog input values (0–1023).</p>
+<div class="syntax">Syntax: analogRead(pin);</div>
+
+<pre id="c8">
+<span class="type">int</span> sensorValue = <span class="type">analogRead</span>(A0);
+</pre>
+<button class="copy-btn" onclick="copyCode('c8')">Copy Code</button>
+</div>
+
+<!-- 9 -->
+<div class="section">
+<h2>9. analogWrite()</h2>
+<p class="desc">Outputs PWM value to control brightness or speed.</p>
+<div class="syntax">Syntax: analogWrite(pin, value);</div>
+
+<pre id="c9">
+<span class="type">analogWrite</span>(<span class="number">9</span>, <span class="number">128</span>);
+</pre>
+<button class="copy-btn" onclick="copyCode('c9')">Copy Code</button>
+</div>
+
+<!-- 10 -->
+<div class="section">
+<h2>10. delay()</h2>
+<p class="desc">Pauses program execution for a specified time.</p>
+<div class="syntax">Syntax: delay(milliseconds);</div>
+
+<pre id="c10">
+<span class="type">delay</span>(<span class="number">1000</span>);
+</pre>
+<button class="copy-btn" onclick="copyCode('c10')">Copy Code</button>
+</div>
+
+<!-- 11 -->
+<div class="section">
+<h2>11. Logical Operators</h2>
+<p class="desc">Used to combine multiple conditions.</p>
+
+<pre id="c11">
+<span class="keyword">if</span> (a &gt; <span class="number">10</span> && b &lt; <span class="number">20</span>) {
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('c11')">Copy Code</button>
+</div>
+
+<!-- 12 -->
+<div class="section">
+<h2>12. if / else</h2>
+<p class="desc">Executes code based on conditions.</p>
+
+<pre id="c12">
+<span class="keyword">if</span> (value &gt; <span class="number">500</span>) {
+  <span class="type">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">HIGH</span>);
+} <span class="keyword">else</span> {
+  <span class="type">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">LOW</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('c12')">Copy Code</button>
+</div>
+
+<!-- 13 -->
+<div class="section">
+<h2>13. for Loop</h2>
+<p class="desc">Repeats a block of code fixed number of times.</p>
+
+<pre id="c13">
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) {
+  <span class="type">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">HIGH</span>);
+  <span class="type">delay</span>(<span class="number">500</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('c13')">Copy Code</button>
+</div>
+
+<!-- 14 -->
+<div class="section">
+<h2>14. while Loop</h2>
+<p class="desc">Repeats code while condition remains true.</p>
+
+<pre id="c14">
+<span class="keyword">while</span> (<span class="type">digitalRead</span>(<span class="number">2</span>) == <span class="keyword">LOW</span>) {
+  <span class="type">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">HIGH</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('c14')">Copy Code</button>
+</div>
+
+<!-- 15 -->
+<div class="section">
+<h2>15. User Defined Functions</h2>
+<p class="desc">Functions help reuse code and improve readability.</p>
+<span class="syntax"> returnType functionName(parameters) {
+    <br> <br> }
+</span>
+<pre id="c15">
+<span class="keyword">void</span> blinkLED(<span class="type">int</span> pin) {
+  <span class="type">digitalWrite</span>(pin, <span class="keyword">HIGH</span>);
+  <span class="type">delay</span>(<span class="number">500</span>);
+  <span class="type">digitalWrite</span>(pin, <span class="keyword">LOW</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('c15')">Copy Code</button>
+</div>
+
+<!-- 16 -->
+<div class="section">
+<h2>16. Serial Communication</h2>
+<p class="desc">Used to send and receive data with computer.</p>
+
+<pre id="c16">
+<span class="keyword">void</span> setup() {
+  Serial.begin(<span class="number">9600</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  Serial.println(<span class="string">"Hello Arduino"</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('c16')">Copy Code</button>
+</div>
+
+<!-- 17 -->
+<div class="section">
+<h2>17. EEPROM</h2>
+<p class="desc">Stores data permanently even after power off.</p>
+
+<pre id="c17">
+<span class="comment">// Include EEPROM library</span>
+#include &lt;EEPROM.h&gt;
+
+EEPROM.write(<span class="number">0</span>, <span class="number">100</span>);
+<span class="type">int</span> value = EEPROM.read(<span class="number">0</span>);
+</pre>
+<button class="copy-btn" onclick="copyCode('c17')">Copy Code</button>
+</div>
+
+<!-- Example 1 -->
+<div class="section">
+<h2>Example 1: Basic LED Blink</h2>
+<p class="desc">Turns an LED ON and OFF repeatedly using pinMode and digitalWrite.</p>
+
+<pre id="ex1">
+<span class="type">int</span> ledPin = <span class="number">13</span>;
+
+<span class="keyword">void</span> setup() {
+  <span class="type">pinMode</span>(ledPin, <span class="keyword">OUTPUT</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="type">digitalWrite</span>(ledPin, <span class="keyword">HIGH</span>);
+  <span class="type">delay</span>(<span class="number">1000</span>);
+  <span class="type">digitalWrite</span>(ledPin, <span class="keyword">LOW</span>);
+  <span class="type">delay</span>(<span class="number">1000</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex1')">Copy Code</button>
+</div>
+
+<!-- Example 2 -->
+<div class="section">
+<h2>Example 2: LED ON using Digital Output</h2>
+<p class="desc">Turns an LED ON permanently using digitalWrite.</p>
+
+<pre id="ex2">
+<span class="type">int</span> ledPin = <span class="number">13</span>;
+
+<span class="keyword">void</span> setup() {
+  <span class="type">pinMode</span>(ledPin, <span class="keyword">OUTPUT</span>);
+  <span class="type">digitalWrite</span>(ledPin, <span class="keyword">HIGH</span>);
+}
+
+<span class="keyword">void</span> loop() {
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex2')">Copy Code</button>
+</div>
+
+<!-- Example 3 -->
+<div class="section">
+<h2>Example 3: Read Button State</h2>
+<p class="desc">Reads a button input using digitalRead.</p>
+
+<pre id="ex3">
+<span class="type">int</span> buttonPin = <span class="number">2</span>;
+
+<span class="keyword">void</span> setup() {
+  <span class="type">pinMode</span>(buttonPin, <span class="keyword">INPUT_PULLUP</span>);
+  Serial.begin(<span class="number">9600</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="type">int</span> state = <span class="type">digitalRead</span>(buttonPin);
+  Serial.println(state);
+  <span class="type">delay</span>(<span class="number">500</span>);
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex3')">Copy Code</button>
+</div>
+
+<!-- Example 4 -->
+<div class="section">
+<h2>Example 4: Button Controlled LED (if / else)</h2>
+<p class="desc">Turns LED ON or OFF based on button press using if-else.</p>
+
+<pre id="ex4">
+<span class="type">int</span> ledPin = <span class="number">13</span>;
+<span class="type">int</span> buttonPin = <span class="number">2</span>;
+
+<span class="keyword">void</span> setup() {
+  <span class="type">pinMode</span>(ledPin, <span class="keyword">OUTPUT</span>);
+  <span class="type">pinMode</span>(buttonPin, <span class="keyword">INPUT_PULLUP</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="keyword">if</span> (<span class="type">digitalRead</span>(buttonPin) == <span class="keyword">HIGH</span>) {
+    <span class="type">digitalWrite</span>(ledPin, <span class="keyword">HIGH</span>);
+  } <span class="keyword">else</span> {
+    <span class="type">digitalWrite</span>(ledPin, <span class="keyword">LOW</span>);
+  }
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex4')">Copy Code</button>
+</div>
+
+<!-- Example 5 -->
+<div class="section">
+<h2>Example 5: LED Blink using for Loop</h2>
+<p class="desc">Blinks an LED multiple times using a for loop.</p>
+
+<pre id="ex5">
+<span class="type">int</span> ledPin = <span class="number">13</span>;
+
+<span class="keyword">void</span> setup() {
+  <span class="type">pinMode</span>(ledPin, <span class="keyword">OUTPUT</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) {
+    <span class="type">digitalWrite</span>(ledPin, <span class="keyword">HIGH</span>);
+    <span class="type">delay</span>(<span class="number">500</span>);
+    <span class="type">digitalWrite</span>(ledPin, <span class="keyword">LOW</span>);
+    <span class="type">delay</span>(<span class="number">500</span>);
+  }
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex5')">Copy Code</button>
+</div>
+
+<!-- Example 6 -->
+<div class="section">
+<h2>Example 6: Button Controlled LED Blink using Function</h2>
+<p class="desc">When the button is pressed, the LED blinks 5 times using a user-defined function and a for loop.</p>
+
+<pre id="ex6">
+<span class="type">int</span> ledPin = <span class="number">8</span>;
+<span class="type">int</span> btn = <span class="number">2</span>;
+
+<span class="keyword">void</span> setup() {
+  <span class="type">pinMode</span>(ledPin, <span class="keyword">OUTPUT</span>);
+  <span class="type">pinMode</span>(btn, <span class="keyword">INPUT_PULLUP</span>);
+}
+
+<span class="keyword">void</span> loop() {
+  <span class="keyword">if</span> (<span class="type">digitalRead</span>(btn) == <span class="keyword">LOW</span>) {
+    <span class="function">blink</span>();
+  }
+}
+
+<span class="keyword">void</span> <span class="function">blink</span>() {
+  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) {
+    <span class="type">digitalWrite</span>(ledPin, <span class="keyword">HIGH</span>);
+    <span class="type">delay</span>(<span class="number">500</span>);
+    <span class="type">digitalWrite</span>(ledPin, <span class="keyword">LOW</span>);
+    <span class="type">delay</span>(<span class="number">500</span>);
+  }
+}
+</pre>
+<button class="copy-btn" onclick="copyCode('ex6')">Copy Code</button>
+</div>
+
+
+</body>
+</html>

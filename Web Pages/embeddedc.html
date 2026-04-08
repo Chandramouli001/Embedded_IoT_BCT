@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Embedded C Basics – 8051</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: Georgia, serif;
+    background: #f5f5f0;
+    color: #222;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  header {
+    background: #1a1a2e;
+    color: #fff;
+    text-align: center;
+    padding: 40px 20px 30px;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  header p {
+    color: #aaa;
+    font-size: 0.95rem;
+    font-family: monospace;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+  }
+
+  /* TOC */
+  .toc {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 36px;
+  }
+
+  .toc h2 {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 12px;
+    font-family: monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .toc ol {
+    padding-left: 20px;
+  }
+
+  .toc ol li {
+    margin-bottom: 4px;
+  }
+
+  .toc a {
+    color: #1a1a2e;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+
+  .toc a:hover {
+    text-decoration: underline;
+    color: #3a5bd9;
+  }
+
+  /* Section */
+  .section {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-num {
+    background: rgba(255,255,255,0.15);
+    font-family: monospace;
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
+
+  .section-body {
+    padding: 20px;
+  }
+
+  /* Code */
+  pre {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border-radius: 5px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+    font-size: 0.88rem;
+    line-height: 1.75;
+  }
+
+  code {
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  .kw  { color: #c586c0; }
+  .fn  { color: #dcdcaa; }
+  .cm  { color: #6a9955; }
+  .num { color: #b5cea8; }
+  .inc { color: #ce9178; }
+  .op  { color: #9cdcfe; }
+
+  /* Explanation */
+  .explanation {
+    background: #f0f7f0;
+    border-left: 4px solid #4caf50;
+    border-radius: 0 4px 4px 0;
+    padding: 14px 18px;
+  }
+
+  .exp-title {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #2e7d32;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+
+  .exp-list {
+    list-style: none;
+  }
+
+  .exp-list li {
+    padding: 3px 0 3px 16px;
+    position: relative;
+    font-size: 0.97rem;
+    color: #333;
+  }
+
+  .exp-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #4caf50;
+    font-weight: bold;
+  }
+
+  .exp-list li code {
+    background: #e8f5e9;
+    color: #1b5e20;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* Quick Revision */
+  .revision {
+    background: #fff8e1;
+    border: 1px solid #f9a825;
+    border-radius: 6px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .revision h2 {
+    font-size: 1.1rem;
+    color: #e65100;
+    margin-bottom: 16px;
+  }
+
+  .rev-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+
+  .rev-list li {
+    background: #fff;
+    border: 1px solid #ffe082;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 0.93rem;
+    color: #333;
+  }
+
+  .rev-list li code {
+    background: #fff3e0;
+    color: #bf360c;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-size: 0.85rem;
+    border-top: 1px solid #ddd;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📘 Embedded C Basics (8051)</h1>
+  <p>Complete guide with code + explanation</p>
+</header>
+
+<div class="container">
+
+  <div class="toc">
+    <h2>// Contents</h2>
+    <ol>
+      <li><a href="#s1">Basic Structure</a></li>
+      <li><a href="#s2">Delay Function</a></li>
+      <li><a href="#s3">Single LED Blink</a></li>
+      <li><a href="#s4">Multiple LED Blink</a></li>
+      <li><a href="#s5">Control Specific Pins</a></li>
+      <li><a href="#s6">LED Pattern</a></li>
+      <li><a href="#s7">Running LED</a></li>
+      <li><a href="#s8">Switch → LED</a></li>
+      <li><a href="#s9">Toggle LED using Switch</a></li>
+      <li><a href="#s10">Input to Output</a></li>
+      <li><a href="#s11">Counter</a></li>
+      <li><a href="#s12">Buzzer</a></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Basic Structure</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>   <span class="cm">// header file</span>
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {       <span class="cm">// infinite loop</span>
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li><code>REG51.H</code> → gives access to ports (P1, P2, etc.)</li>
+          <li><code>main()</code> → starting point</li>
+          <li><code>while(1)</code> → runs forever (embedded systems never stop)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Delay Function</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="kw">void</span> <span class="fn">delay</span>() {       <span class="cm">// delay</span>
+    <span class="kw">int</span> i,j;
+    <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">100</span>;i++)
+        <span class="kw">for</span>(j=<span class="num">0</span>;j&lt;<span class="num">1000</span>;j++);
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li>Uses loops to waste time</li>
+          <li>Makes LED blinking visible</li>
+          <li>Not accurate, just for practice</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Single LED Blink</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">sbit</span> LED = <span class="op">P1^0</span>;   <span class="cm">// LED pin</span>
+
+<span class="kw">void</span> <span class="fn">delay</span>() {
+    <span class="kw">int</span> i,j;
+    <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">100</span>;i++)
+        <span class="kw">for</span>(j=<span class="num">0</span>;j&lt;<span class="num">1000</span>;j++);
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        LED = <span class="num">0</span>;   <span class="cm">// ON</span>
+        <span class="fn">delay</span>();
+        LED = <span class="num">1</span>;   <span class="cm">// OFF</span>
+        <span class="fn">delay</span>();
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li><code>sbit</code> selects pin P1.0</li>
+          <li><code>0</code> → LED ON (active LOW)</li>
+          <li><code>1</code> → LED OFF</li>
+          <li>Delay creates blinking</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Multiple LED Blink</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">void</span> <span class="fn">delay</span>() {
+    <span class="kw">int</span> i,j;
+    <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">100</span>;i++)
+        <span class="kw">for</span>(j=<span class="num">0</span>;j&lt;<span class="num">1000</span>;j++);
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        P1 = <span class="num">0x00</span>;   <span class="cm">// all ON</span>
+        <span class="fn">delay</span>();
+        P1 = <span class="num">0xFF</span>;   <span class="cm">// all OFF</span>
+        <span class="fn">delay</span>();
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li><code>P1</code> controls 8 pins together</li>
+          <li><code>0x00</code> → all pins LOW → LEDs ON</li>
+          <li><code>0xFF</code> → all pins HIGH → LEDs OFF</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Control Specific Pins</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">sbit</span> LED1 = <span class="op">P1^0</span>;
+<span class="kw">sbit</span> LED2 = <span class="op">P1^1</span>;
+
+<span class="kw">void</span> <span class="fn">delay</span>() {
+    <span class="kw">int</span> i,j;
+    <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">100</span>;i++)
+        <span class="kw">for</span>(j=<span class="num">0</span>;j&lt;<span class="num">1000</span>;j++);
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        LED1 = <span class="num">0</span>;   <span class="cm">// ON</span>
+        LED2 = <span class="num">1</span>;   <span class="cm">// OFF</span>
+        <span class="fn">delay</span>();
+
+        LED1 = <span class="num">1</span>;
+        LED2 = <span class="num">0</span>;
+        <span class="fn">delay</span>();
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li>Controls pins individually</li>
+          <li>LED1 ON, LED2 OFF → then reverse</li>
+          <li>Good for learning pin-level control</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">LED Pattern</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">void</span> <span class="fn">delay</span>() {
+    <span class="kw">int</span> i,j;
+    <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">100</span>;i++)
+        <span class="kw">for</span>(j=<span class="num">0</span>;j&lt;<span class="num">1000</span>;j++);
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        P1 = <span class="num">0xAA</span>;   <span class="cm">// 10101010</span>
+        <span class="fn">delay</span>();
+        P1 = <span class="num">0x55</span>;   <span class="cm">// 01010101</span>
+        <span class="fn">delay</span>();
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li>Creates alternate LED pattern</li>
+          <li>Even LEDs ON → then odd LEDs ON</li>
+          <li>Uses binary pattern</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">Running LED</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">void</span> <span class="fn">delay</span>() {
+    <span class="kw">int</span> i,j;
+    <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">100</span>;i++)
+        <span class="kw">for</span>(j=<span class="num">0</span>;j&lt;<span class="num">1000</span>;j++);
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        P1 = <span class="num">0xFE</span>; <span class="fn">delay</span>();
+        P1 = <span class="num">0xFD</span>; <span class="fn">delay</span>();
+        P1 = <span class="num">0xFB</span>; <span class="fn">delay</span>();
+        P1 = <span class="num">0xF7</span>; <span class="fn">delay</span>();
+        P1 = <span class="num">0xEF</span>; <span class="fn">delay</span>();
+        P1 = <span class="num">0xDF</span>; <span class="fn">delay</span>();
+        P1 = <span class="num">0xBF</span>; <span class="fn">delay</span>();
+        P1 = <span class="num">0x7F</span>; <span class="fn">delay</span>();
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li>Only one LED ON at a time</li>
+          <li>Moves from P1.0 → P1.7</li>
+          <li>Creates running (chasing) effect</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">Switch → LED</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">sbit</span> SW  = <span class="op">P1^1</span>;
+<span class="kw">sbit</span> LED = <span class="op">P1^0</span>;
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        <span class="kw">if</span>(SW == <span class="num">0</span>)   <span class="cm">// pressed</span>
+            LED = <span class="num">0</span>;  <span class="cm">// ON</span>
+        <span class="kw">else</span>
+            LED = <span class="num">1</span>;  <span class="cm">// OFF</span>
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li>Reads switch input</li>
+          <li>If pressed → LED ON</li>
+          <li>If not → LED OFF</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <span class="section-title">Toggle LED using Switch</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">sbit</span> SW  = <span class="op">P1^1</span>;
+<span class="kw">sbit</span> LED = <span class="op">P1^0</span>;
+
+<span class="kw">void</span> <span class="fn">delay</span>() {
+    <span class="kw">int</span> i,j;
+    <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">100</span>;i++)
+        <span class="kw">for</span>(j=<span class="num">0</span>;j&lt;<span class="num">1000</span>;j++);
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        <span class="kw">if</span>(SW == <span class="num">0</span>) {
+            LED = ~LED;   <span class="cm">// toggle</span>
+            <span class="fn">delay</span>();
+        }
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li>Each press changes LED state</li>
+          <li><code>~LED</code> flips ON ↔ OFF</li>
+          <li>Delay avoids multiple triggers</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <span class="section-title">Input to Output</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        P2 = P1;   <span class="cm">// copy</span>
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li>Reads data from Port 1</li>
+          <li>Sends same data to Port 2</li>
+          <li>Used for interfacing</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <span class="section-title">Counter</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">void</span> <span class="fn">delay</span>() {
+    <span class="kw">int</span> i,j;
+    <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">100</span>;i++)
+        <span class="kw">for</span>(j=<span class="num">0</span>;j&lt;<span class="num">1000</span>;j++);
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">unsigned char</span> i;
+
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">256</span>;i++) {
+            P1 = i;
+            <span class="fn">delay</span>();
+        }
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li>Counts from 0 to 255</li>
+          <li>Shows binary output on LEDs</li>
+          <li>Good for understanding binary</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <span class="section-title">Buzzer</span>
+    </div>
+    <div class="section-body">
+      <pre><code><span class="inc">#include &lt;REG51.H&gt;</span>
+
+<span class="kw">sbit</span> BUZ = <span class="op">P1^2</span>;
+
+<span class="kw">void</span> <span class="fn">delay</span>() {
+    <span class="kw">int</span> i,j;
+    <span class="kw">for</span>(i=<span class="num">0</span>;i&lt;<span class="num">100</span>;i++)
+        <span class="kw">for</span>(j=<span class="num">0</span>;j&lt;<span class="num">1000</span>;j++);
+}
+
+<span class="kw">void</span> <span class="fn">main</span>() {
+    <span class="kw">while</span>(<span class="num">1</span>) {
+        BUZ = <span class="num">1</span>;   <span class="cm">// ON</span>
+        <span class="fn">delay</span>();
+        BUZ = <span class="num">0</span>;   <span class="cm">// OFF</span>
+        <span class="fn">delay</span>();
+    }
+}</code></pre>
+      <div class="explanation">
+        <div class="exp-title">👉 Explanation</div>
+        <ul class="exp-list">
+          <li>Turns buzzer ON and OFF</li>
+          <li>Works like LED blinking</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Revision -->
+  <div class="revision">
+    <h2>🔥 Final Quick Revision</h2>
+    <ul class="rev-list">
+      <li><code>sbit</code> → control single pin</li>
+      <li><code>P1 = value</code> → control full port</li>
+      <li><code>0</code> → ON (active LOW)</li>
+      <li><code>1</code> → OFF</li>
+      <li>Delay → makes output visible</li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>Embedded C · 8051 Microcontroller · Basics Guide</footer>
+
+</body>
+</html>
