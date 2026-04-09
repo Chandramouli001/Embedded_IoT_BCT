@@ -5,14 +5,14 @@
   <img src="https://img.shields.io/badge/Duration-30%20Hours-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Modules-5-green?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Level-Intermediate-orange?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Department-ECE-purple?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Department-ECE & CSE-purple?style=for-the-badge" />
 </p>
 
 ---
 
 ## 📌 Overview  
 
-This **Beyond Curriculum Training Program** is designed for **ECE students (2023–27 batch)** focusing on **Embedded Systems and IoT**.  
+This **Beyond Curriculum Training Program** is designed for **ECE and CSE students (2023–27 batch)** focusing on **Embedded Systems and IoT**.  
 
 It bridges the gap between **academic theory** and **industry-level practical implementation**, covering both **hardware and software domains**.
 
