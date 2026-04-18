@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Arduino Project Portfolio</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #141E30, #243B55);
+    color: #fff;
+}
+
+/* HEADER */
+h1 {
+    text-align: center;
+    padding: 30px 10px;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #00dbde, #fc00ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* CONTAINER */
+.container {
+    width: 90%;
+    margin: auto;
+    display: grid;
+    gap: 25px;
+}
+
+/* PROJECT CARD */
+.project {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: 0.4s;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.project:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+}
+
+/* TITLE */
+.project h2 {
+    margin-top: 0;
+    color: #00dbde;
+}
+
+/* BUTTON */
+button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    background: linear-gradient(45deg, #00dbde, #fc00ff);
+    color: white;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px #fc00ff;
+}
+
+/* IMAGE */
+img {
+    display: none;
+    width: 100%;
+    max-width: 350px;
+    margin-top: 15px;
+    border-radius: 12px;
+    border: 2px solid #00dbde;
+    transition: 0.3s;
+}
+
+/* CODE BLOCK */
+pre {
+    background: #0d1117;
+    color: #00ff88;
+    padding: 15px;
+    border-radius: 12px;
+    overflow-x: auto;
+    font-size: 14px;
+    margin-top: 15px;
+    border-left: 4px solid #00dbde;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: #00dbde;
+    border-radius: 10px;
+}
+</style>
+
+<script>
+function showImage(id) {
+    var img = document.getElementById(id);
+    img.style.display = (img.style.display === "block") ? "none" : "block";
+}
+</script>
+
+</head>
+
+<body>
+
+<h1>Arduino Project Portfolio</h1>
+
+<div class="container">
+
+<!-- 1 RADAR -->
+<div class="project">
+<h2>1. Radar System</h2>
+<button onclick="showImage('img1')">Show Circuit</button>
+<img id="img1" src="./1.png">
+
+<pre>
+#include &lt;Wire.h&gt;
+#include &lt;LiquidCrystal_I2C.h&gt;
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+int trigL = 13;
+int echoL = 12;
+int trigR = 3;
+int echoR = 2;
+
+int buzzerL = 8;
+int buzzerR = 7;
+
+long duration;
+int distanceL, distanceR;
+
+void setup() {
+  pinMode(trigL, OUTPUT);
+  pinMode(echoL, INPUT);
+  pinMode(trigR, OUTPUT);
+  pinMode(echoR, INPUT);
+
+  pinMode(buzzerL, OUTPUT);
+  pinMode(buzzerR, OUTPUT);
+
+  lcd.init();
+  lcd.backlight();
+}
+
+int getDistance(int trig, int echo) {
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+
+  duration = pulseIn(echo, HIGH);
+  return duration * 0.034 / 2;
+}
+
+void loop() {
+  distanceL = getDistance(trigL, echoL);
+  distanceR = getDistance(trigR, echoR);
+
+  lcd.clear();
+
+  if (distanceL < 100) {
+    digitalWrite(buzzerL, HIGH);
+    lcd.setCursor(0, 0);
+    lcd.print("Enemy LEFT");
+  } else digitalWrite(buzzerL, LOW);
+
+  if (distanceR < 100) {
+    digitalWrite(buzzerR, HIGH);
+    lcd.setCursor(0, 1);
+    lcd.print("Enemy RIGHT");
+  } else digitalWrite(buzzerR, LOW);
+
+  if (distanceL >= 100 && distanceR >= 100) {
+    lcd.setCursor(0, 0);
+    lcd.print("No Enemy");
+  }
+
+  delay(300);
+}
+</pre>
+</div>
+
+<!-- 2 IR -->
+<div class="project">
+<h2>2. IR Home Automation</h2>
+<button onclick="showImage('img2')">Show Circuit</button>
+<img id="img2" src="./2.png">
+
+<pre>
+#include &lt;IRremote.h&gt;
+
+int led1 = 7;
+int led2 = 8;
+int led3 = 9;
+int led4 = 10;
+
+bool s1=false,s2=false,s3=false,s4=false;
+
+void setup() {
+  Serial.begin(9600);
+  IrReceiver.begin(2);
+
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+  pinMode(led4, OUTPUT);
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+
+    unsigned long code = IrReceiver.decodedIRData.decodedRawData;
+    Serial.println(code, HEX);
+
+    if (code == 0xEF10BF00) { s1=!s1; digitalWrite(led1,s1); }
+    if (code == 0xEE11BF00) { s2=!s2; digitalWrite(led2,s2); }
+    if (code == 0xED12BF00) { s3=!s3; digitalWrite(led3,s3); }
+    if (code == 0xEB14BF00) { s4=!s4; digitalWrite(led4,s4); }
+
+    IrReceiver.resume();
+  }
+}
+</pre>
+</div>
+
+<!-- 3 PIANO -->
+<div class="project">
+<h2>3. Arduino Piano</h2>
+<button onclick="showImage('img3')">Show Circuit</button>
+<img id="img3" src="./3.png">
+
+<pre>
+int buzzer = 9;
+
+int btn1 = 2;
+int btn2 = 3;
+int btn3 = 4;
+int btn4 = 5;
+
+void setup() {
+  pinMode(btn1, INPUT_PULLUP);
+  pinMode(btn2, INPUT_PULLUP);
+  pinMode(btn3, INPUT_PULLUP);
+  pinMode(btn4, INPUT_PULLUP);
+}
+
+void loop() {
+  if (digitalRead(btn1) == LOW) tone(buzzer,262);
+  else if (digitalRead(btn2) == LOW) tone(buzzer,294);
+  else if (digitalRead(btn3) == LOW) tone(buzzer,330);
+  else if (digitalRead(btn4) == LOW) tone(buzzer,349);
+  else noTone(buzzer);
+}
+</pre>
+</div>
+
+<!-- 4 STREET LIGHT -->
+<div class="project">
+<h2>4. Automatic Street Light</h2>
+<button onclick="showImage('img4')">Show Circuit</button>
+<img id="img4" src="./4.png">
+
+<pre>
+int ldr = A0;
+int pir = 8;
+int led = 2;
+
+void setup() {
+  pinMode(pir, INPUT);
+  pinMode(led, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int lightValue = analogRead(ldr);
+  int motion = digitalRead(pir);
+
+  if (lightValue < 300 && motion == HIGH) {
+    digitalWrite(led, HIGH);
+    delay(10000);
+    digitalWrite(led, LOW);
+  } else {
+    digitalWrite(led, LOW);
+  }
+
+  delay(200);
+}
+</pre>
+</div>
+
+<!-- 5 GAS -->
+<div class="project">
+<h2>5. Gas + Light Alarm</h2>
+<button onclick="showImage('img5')">Show Circuit</button>
+<img id="img5" src="./5.png">
+
+<pre>
+int gasSensor = A0;
+int photoSensor = A1;
+
+int led = 7;
+int buzzer = 8;
+
+void setup() {
+  pinMode(led, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int gasValue = analogRead(gasSensor);
+  int lightValue = analogRead(photoSensor);
+
+  if (gasValue > 110 || lightValue > 500) {
+    digitalWrite(led, HIGH);
+    digitalWrite(buzzer, HIGH);
+  } else {
+    digitalWrite(led, LOW);
+    digitalWrite(buzzer, LOW);
+  }
+}
+</pre>
+</div>
+
+</div>
+
+</body>
+</html>
