@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arduino Sensor Library — Rev. B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<style>
+  :root{
+    --board:#0f2419;
+    --board-deep:#0a1911;
+    --board-raised:#132c1f;
+    --silk:#eef2ea;
+    --silk-dim:#b9c7bc;
+    --muted:#7f9788;
+    --copper:#d4a15c;
+    --copper-dim:#a67c3f;
+    --trace:#6fd8c4;
+    --trace-dim:#3f7a6d;
+    --amber:#e8a33d;
+    --line:#1e3d2a;
+    --radius:3px;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+    --sans:'Inter', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation:none !important; transition:none !important;} }
+
+  body{
+    margin:0;
+    background:var(--board);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(212,161,92,0.05) 1px, transparent 0);
+    background-size:24px 24px;
+    color:var(--silk);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- rail ---------- */
+  .rail{
+    height:10px;
+    width:100%;
+    background:repeating-linear-gradient(90deg,
+      #b23b3b 0 3px, transparent 3px 6px);
+    opacity:.55;
+  }
+  .rail.blue{ background:repeating-linear-gradient(90deg, #3b6bb2 0 3px, transparent 3px 6px); }
+
+  /* ---------- top header / title block ---------- */
+  header.titleblock{
+    border-bottom:1px solid var(--line);
+    padding:28px clamp(20px,4vw,56px) 26px;
+    position:relative;
+    overflow:hidden;
+  }
+  .tb-top{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap;
+  }
+  .tb-eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.18em; color:var(--trace);
+    text-transform:uppercase; margin:0 0 10px;
+  }
+  h1.tb-title{
+    font-family:var(--mono); font-weight:700; font-size:clamp(28px,4.4vw,46px);
+    margin:0; color:var(--silk); letter-spacing:-0.01em; line-height:1.05;
+  }
+  .tb-title .amp{ color:var(--copper); }
+  .tb-sub{
+    max-width:560px; color:var(--silk-dim); font-size:15px; line-height:1.6; margin:14px 0 0;
+  }
+  .tb-meta{
+    font-family:var(--mono); font-size:11px; color:var(--muted); text-align:right;
+    display:flex; flex-direction:column; gap:6px; padding-top:4px;
+  }
+  .tb-meta span b{ color:var(--copper); font-weight:600; }
+
+  .trace-art{
+    position:absolute; right:clamp(-40px,-2vw,0px); top:0; height:100%; width:320px;
+    opacity:.9; pointer-events:none;
+  }
+
+  /* ---------- layout ---------- */
+  .layout{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    max-width:1240px;
+    margin:0 auto;
+  }
+  @media (max-width:860px){ .layout{ grid-template-columns:1fr; } }
+
+  /* ---------- sidebar / BOM ---------- */
+  aside.bom{
+    border-right:1px solid var(--line);
+    padding:22px 0 60px;
+    position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+  }
+  @media (max-width:860px){ aside.bom{ position:static; height:auto; border-right:none; border-bottom:1px solid var(--line);} }
+
+  .bom-label{
+    font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--muted);
+    text-transform:uppercase; padding:0 20px 12px; margin:0;
+    display:flex; justify-content:space-between;
+  }
+  nav.bom-list{ display:flex; flex-direction:column; }
+  nav.bom-list a{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 20px; text-decoration:none; color:var(--silk-dim);
+    border-left:2px solid transparent;
+    font-size:13.5px; position:relative;
+    transition:color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  nav.bom-list a:hover{ color:var(--silk); background:rgba(212,161,92,0.05); }
+  nav.bom-list a.active{
+    color:var(--silk); border-left-color:var(--copper);
+    background:rgba(212,161,92,0.07);
+  }
+  nav.bom-list a.active .desig{ color:var(--copper); }
+  .desig{
+    font-family:var(--mono); font-size:11px; color:var(--trace-dim);
+    min-width:44px; flex-shrink:0;
+  }
+  .bom-name{ display:flex; flex-direction:column; }
+  .bom-name small{ color:var(--muted); font-size:10.5px; margin-top:1px; }
+
+  /* ---------- main ---------- */
+  main{ padding:0 0 100px; min-width:0; }
+
+  section.card{
+    padding:56px clamp(20px,4vw,56px) 40px;
+    border-bottom:1px solid var(--line);
+    scroll-margin-top:10px;
+  }
+  section.card:last-child{ border-bottom:none; }
+
+  .card-head{
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:6px;
+  }
+  .card-desig{
+    font-family:var(--mono); color:var(--copper); font-size:14px; font-weight:600;
+    border:1px solid var(--copper-dim); border-radius:var(--radius); padding:2px 8px;
+  }
+  h2.card-title{
+    font-family:var(--mono); font-size:clamp(20px,2.6vw,26px); margin:0; color:var(--silk); font-weight:700;
+  }
+  .card-tagline{ color:var(--silk-dim); font-size:14.5px; margin:10px 0 22px; max-width:640px; line-height:1.6; }
+
+  /* pinout row */
+  .pinout{
+    display:flex; align-items:center; gap:0; flex-wrap:wrap;
+    margin-bottom:26px; border:1px solid var(--line); border-radius:var(--radius);
+    background:var(--board-raised); overflow:hidden;
+  }
+  .pinout .icon-cell{
+    padding:14px 18px; border-right:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .pinout .pins{
+    display:flex; flex-wrap:wrap; gap:0; flex:1;
+  }
+  .pin{
+    padding:12px 18px; font-family:var(--mono); font-size:12px; color:var(--silk-dim);
+    border-right:1px solid var(--line); white-space:nowrap;
+  }
+  .pin:last-child{ border-right:none; }
+  .pin b{ color:var(--trace); font-weight:600; display:block; font-size:10px; letter-spacing:.08em; margin-bottom:3px; text-transform:uppercase; }
+
+  /* code block */
+  .codewrap{ position:relative; margin-bottom:20px; }
+  .codebar{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--board-deep); border:1px solid var(--line); border-bottom:none;
+    border-radius:var(--radius) var(--radius) 0 0;
+    padding:9px 16px; font-family:var(--mono); font-size:11.5px; color:var(--muted);
+  }
+  .copy-btn{
+    font-family:var(--mono); font-size:11px; color:var(--trace); background:transparent;
+    border:1px solid var(--trace-dim); border-radius:var(--radius); padding:4px 10px; cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .copy-btn:hover{ background:rgba(111,216,196,0.1); }
+  .copy-btn:focus-visible, a:focus-visible, nav.bom-list a:focus-visible{ outline:2px solid var(--trace); outline-offset:2px; }
+  .copy-btn.copied{ color:var(--amber); border-color:var(--amber); }
+  pre{
+    margin:0; border:1px solid var(--line); border-radius:0 0 var(--radius) var(--radius);
+    overflow-x:auto; font-size:12.5px; line-height:1.6;
+  }
+  pre code.hljs{ padding:18px !important; background:var(--board-deep) !important; }
+
+  /* notes */
+  .note{
+    border-left:3px solid var(--amber); background:rgba(232,163,61,0.07);
+    padding:12px 16px; font-size:13.5px; color:var(--silk-dim); line-height:1.6; border-radius:0 var(--radius) var(--radius) 0;
+    margin-bottom:8px;
+  }
+  .note b{ color:var(--amber); font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; display:block; margin-bottom:4px;}
+
+  /* footer */
+  footer{
+    padding:30px clamp(20px,4vw,56px) 50px; color:var(--muted); font-family:var(--mono); font-size:11.5px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  footer a{ color:var(--trace); text-decoration:none; }
+
+  ::selection{ background:var(--copper); color:var(--board-deep); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-track{ background:var(--board-deep); }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:5px; }
+  ::-webkit-scrollbar-thumb:hover{ background:var(--copper-dim); }
+</style>
+</head>
+<body>
+
+
+<div class="layout">
+  <aside class="bom">
+    <p class="bom-label"><span>Bill of Materials</span><span>10</span></p>
+    <nav class="bom-list" id="bomList">
+      <a href="#ldr" data-target="ldr"><span class="desig">LDR1</span><span class="bom-name">Photoresistor<small>Light threshold + LED</small></span></a>
+      <a href="#pd" data-target="pd"><span class="desig">PD1</span><span class="bom-name">Photodiode<small>Analog light sensing</small></span></a>
+      <a href="#flex" data-target="flex"><span class="desig">FLX1</span><span class="bom-name">Flex Sensor<small>Bend angle → 4 zones</small></span></a>
+      <a href="#soil" data-target="soil"><span class="desig">SOIL1</span><span class="bom-name">Soil Moisture<small>4‑stage indicator</small></span></a>
+      <a href="#tilt" data-target="tilt"><span class="desig">TILT1</span><span class="bom-name">Tilt Switch<small>Pull‑up ball switch</small></span></a>
+      <a href="#us" data-target="us"><span class="desig">US1</span><span class="bom-name">HC‑SR04<small>Ultrasonic distance</small></span></a>
+      <a href="#temp" data-target="temp"><span class="desig">TEMP1</span><span class="bom-name">LM35<small>Analog temperature</small></span></a>
+      <a href="#ir" data-target="ir"><span class="desig">IR1</span><span class="bom-name">IR Receiver<small>Remote decode</small></span></a>
+      <a href="#gas" data-target="gas"><span class="desig">GAS1</span><span class="bom-name">MQ Gas Sensor<small>Analog gas level</small></span></a>
+      <a href="#pir" data-target="pir"><span class="desig">PIR1</span><span class="bom-name">PIR Motion<small>Digital motion trip</small></span></a>
+    </nav>
+  </aside>
+
+  <main>
+
+    <!-- 1 LDR -->
+    <section class="card" id="ldr">
+      <div class="card-head"><span class="card-desig">LDR1</span><h2 class="card-title">Photoresistor (LDR)</h2></div>
+      <p class="card-tagline">Reads ambient light on an analog pin and switches an LED on once it gets dark — the "hello world" of analog sensing.</p>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="23" cy="23" r="12" stroke="#6fd8c4" stroke-width="2"/><path d="M23 3v6M23 37v6M3 23h6M37 23h6M9 9l4 4M33 33l4 4M9 37l4-4M33 9l4-4" stroke="#d4a15c" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Sig</b>A0 ← LDR wiper</div>
+          <div class="pin"><b>Out</b>D13 → LED</div>
+          <div class="pin"><b>Logic</b>value &lt; 500 → dark</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>ldr_sensor.ino</span><button class="copy-btn" data-copy="code-ldr">Copy</button></div>
+        <pre><code class="language-cpp" id="code-ldr">int ldr = A0;
+int led = 13;
+
+void setup() {
+  pinMode(led, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  int value = analogRead(ldr);
+
+  if (value < 500) {      // Dark
+    digitalWrite(led, HIGH);
+  } else {                // Bright
+    digitalWrite(led, LOW);
+  }
+
+  Serial.println(value);
+
+  delay(100);
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- 2 Photodiode -->
+    <section class="card" id="pd">
+      <div class="card-head"><span class="card-desig">PD1</span><h2 class="card-title">Photodiode</h2></div>
+      <p class="card-tagline">Same wiring pattern as the LDR, but the threshold logic is inverted for a photodiode's response curve.</p>
+      <div class="note"><b>Fix applied</b>Since <code>analogRead()</code> returns 0–1023, testing for exactly 1 never fires reliably — swapped for a threshold comparison instead.</div>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 32 L14 14 L28 23 Z" stroke="#6fd8c4" stroke-width="2" stroke-linejoin="round"/><path d="M28 23h8M32 12l4-4M38 18l4-2" stroke="#d4a15c" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Sig</b>A0 ← photodiode</div>
+          <div class="pin"><b>Out</b>D13 → LED</div>
+          <div class="pin"><b>Logic</b>value &gt; 500 → bright</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>photodiode_sensor.ino</span><button class="copy-btn" data-copy="code-pd">Copy</button></div>
+        <pre><code class="language-cpp" id="code-pd">int pd = A0;
+int led = 13;
+
+void setup() {
+  pinMode(led, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  int value = analogRead(pd);
+
+  if (value > 500) {
+    digitalWrite(led, HIGH);
+  } else {
+    digitalWrite(led, LOW);
+  }
+
+  Serial.println(value);
+
+  delay(100);
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- 3 Flex -->
+    <section class="card" id="flex">
+      <div class="card-head"><span class="card-desig">FLX1</span><h2 class="card-title">Flex Sensor</h2></div>
+      <p class="card-tagline">Maps a raw bend reading to a 0–180° angle, then lights one of four LEDs depending on which quarter of the bend range it falls in.</p>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 34 Q18 34 24 24 Q30 14 40 12" stroke="#6fd8c4" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Sig</b>A0 ← divider wiper</div>
+          <div class="pin"><b>Zone 1–4</b>D2 · D3 · D4 · D5</div>
+          <div class="pin"><b>Range</b>raw 990–1017 → 0–180°</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>flex_sensor.ino</span><button class="copy-btn" data-copy="code-flex">Copy</button></div>
+        <pre><code class="language-cpp" id="code-flex">int flex = A0;
+
+int led1 = 2;
+int led2 = 3;
+int led3 = 4;
+int led4 = 5;
+
+void setup() {
+
+  Serial.begin(9600);
+
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+  pinMode(led4, OUTPUT);
+
+}
+
+void loop() {
+
+  int raw = analogRead(flex);
+
+  int angle = map(raw, 990, 1017, 0, 180);
+
+  angle = constrain(angle, 0, 180);
+
+  Serial.print("Raw Value : ");
+  Serial.print(raw);
+  Serial.print("    Bend Angle : ");
+  Serial.print(angle);
+  Serial.println(" Degree");
+
+  digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+  digitalWrite(led4, LOW);
+
+  if (angle < 45) {
+    digitalWrite(led1, HIGH);
+  }
+  else if (angle < 90) {
+    digitalWrite(led2, HIGH);
+  }
+  else if (angle < 135) {
+    digitalWrite(led3, HIGH);
+  }
+  else {
+    digitalWrite(led4, HIGH);
+  }
+
+  delay(200);
+
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- 4 Soil -->
+    <section class="card" id="soil">
+      <div class="card-head"><span class="card-desig">SOIL1</span><h2 class="card-title">Soil Moisture Sensor</h2></div>
+      <p class="card-tagline">Buckets the analog reading into four moisture bands — green through red — driving one indicator LED per band.</p>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M23 6 C23 6 13 20 13 28 A10 10 0 0 0 33 28 C33 20 23 6 23 6Z" stroke="#6fd8c4" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Sig</b>A0 ← soil probe</div>
+          <div class="pin"><b>Bands</b>D2 green · D3 yellow · D4 orange · D5 red</div>
+          <div class="pin"><b>Thresholds</b>≤250 · ≤500 · ≤750 · &gt;750</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>soil_moisture.ino</span><button class="copy-btn" data-copy="code-soil">Copy</button></div>
+        <pre><code class="language-cpp" id="code-soil">int soil = A0;
+
+int green = 2;
+int yellow = 3;
+int orange = 4;
+int red = 5;
+
+void setup() {
+
+  Serial.begin(9600);
+
+  pinMode(green, OUTPUT);
+  pinMode(yellow, OUTPUT);
+  pinMode(orange, OUTPUT);
+  pinMode(red, OUTPUT);
+
+}
+
+void loop() {
+
+  int value = analogRead(soil);
+
+  Serial.print("Soil Value: ");
+  Serial.println(value);
+
+  digitalWrite(green, LOW);
+  digitalWrite(yellow, LOW);
+  digitalWrite(orange, LOW);
+  digitalWrite(red, LOW);
+
+  if (value <= 250) {
+    digitalWrite(green, HIGH);
+  }
+  else if (value <= 500) {
+    digitalWrite(yellow, HIGH);
+  }
+  else if (value <= 750) {
+    digitalWrite(orange, HIGH);
+  }
+  else {
+    digitalWrite(red, HIGH);
+  }
+
+  delay(300);
+
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- 5 Tilt -->
+    <section class="card" id="tilt">
+      <div class="card-head"><span class="card-desig">TILT1</span><h2 class="card-title">Tilt Sensor</h2></div>
+      <p class="card-tagline">A ball‑and‑cage switch on an internal pull‑up — reads LOW when tilted, HIGH when level.</p>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg" transform="rotate(15 23 23)"><rect x="12" y="8" width="22" height="30" rx="11" stroke="#6fd8c4" stroke-width="2"/><circle cx="23" cy="28" r="4" fill="#d4a15c"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Sig</b>D2 (INPUT_PULLUP)</div>
+          <div class="pin"><b>Return</b>other leg → GND</div>
+          <div class="pin"><b>Logic</b>LOW → tilted</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>tilt_sensor.ino</span><button class="copy-btn" data-copy="code-tilt">Copy</button></div>
+        <pre><code class="language-cpp" id="code-tilt">int tilt = 2;
+
+void setup() {
+
+  pinMode(tilt, INPUT_PULLUP);
+  Serial.begin(9600);
+
+}
+
+void loop() {
+
+  int value = digitalRead(tilt);
+
+  if (value == LOW) {
+    Serial.print("Value = ");
+    Serial.print(value);
+    Serial.println("  Tilt Detected");
+  }
+  else {
+    Serial.print("Value = ");
+    Serial.print(value);
+    Serial.println("  Normal Position");
+  }
+
+  delay(500);
+
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- 6 Ultrasonic -->
+    <section class="card" id="us">
+      <div class="card-head"><span class="card-desig">US1</span><h2 class="card-title">Ultrasonic Sensor — HC‑SR04</h2></div>
+      <p class="card-tagline">Fires a 10 µs trigger pulse, times the echo return, and converts round‑trip time to distance in centimeters.</p>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="15" cy="23" r="5" stroke="#6fd8c4" stroke-width="2"/><circle cx="31" cy="23" r="5" stroke="#6fd8c4" stroke-width="2"/><path d="M38 15 Q44 23 38 31M42 10 Q50 23 42 36" stroke="#d4a15c" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Trig</b>D9 → pulse out</div>
+          <div class="pin"><b>Echo</b>D10 ← pulse in</div>
+          <div class="pin"><b>Formula</b>distance = duration / 58</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>ultrasonic_hcsr04.ino</span><button class="copy-btn" data-copy="code-us">Copy</button></div>
+        <pre><code class="language-cpp" id="code-us">int trig = 9;
+int echo = 10;
+
+void setup() {
+
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+
+  Serial.begin(9600);
+
+}
+
+void loop() {
+
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+
+  digitalWrite(trig, LOW);
+
+  long duration = pulseIn(echo, HIGH);
+
+  long distance = duration / 58;
+
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  delay(500);
+
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- 7 LM35 -->
+    <section class="card" id="temp">
+      <div class="card-head"><span class="card-desig">TEMP1</span><h2 class="card-title">LM35 Temperature Sensor</h2></div>
+      <p class="card-tagline">Converts the analog voltage to a temperature reading in real time — no external calibration needed.</p>
+      <div class="note"><b>Sensor check</b>The <code>(voltage − 0.5) × 100</code> formula belongs to a TMP36. A true LM35 outputs 10 mV/°C from 0 V, so use <code>temperature = voltage × 100</code> instead.</div>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="19" y="6" width="8" height="24" rx="4" stroke="#6fd8c4" stroke-width="2"/><circle cx="23" cy="34" r="7" stroke="#6fd8c4" stroke-width="2"/><rect x="21" y="16" width="4" height="14" fill="#d4a15c"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Sig</b>A0 ← Vout</div>
+          <div class="pin"><b>Scale</b>voltage = raw × 5.0 / 1023</div>
+          <div class="pin"><b>As shown</b>temp = (V − 0.5) × 100</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>lm35_temperature.ino</span><button class="copy-btn" data-copy="code-temp">Copy</button></div>
+        <pre><code class="language-cpp" id="code-temp">int tempPin = A0;
+
+void setup() {
+
+  Serial.begin(9600);
+
+}
+
+void loop() {
+
+  int value = analogRead(tempPin);
+
+  float voltage = value * 5.0 / 1023.0;
+
+  float temperature = (voltage - 0.5) * 100;
+
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.println(" &deg;C");
+
+  delay(1000);
+
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- 8 IR -->
+    <section class="card" id="ir">
+      <div class="card-head"><span class="card-desig">IR1</span><h2 class="card-title">IR Remote Receiver</h2></div>
+      <p class="card-tagline">Decodes incoming infrared frames and prints the received hex code to the serial monitor.</p>
+      <div class="note"><b>Library version</b>Written against the classic <code>IRremote</code> API (<code>decode_results</code>). Library v3.x/v4.x renamed several calls — update accordingly if you're on a recent release.</div>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="16" width="26" height="18" rx="3" stroke="#6fd8c4" stroke-width="2"/><path d="M18 10 L14 4M23 10V2M28 10l4-6" stroke="#d4a15c" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Sig</b>D11 ← receiver OUT</div>
+          <div class="pin"><b>Lib</b>IRremote.h</div>
+          <div class="pin"><b>Output</b>Serial hex on decode</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>ir_receiver.ino</span><button class="copy-btn" data-copy="code-ir">Copy</button></div>
+        <pre><code class="language-cpp" id="code-ir">#include &lt;IRremote.h&gt;
+
+int recv = 11;
+
+IRrecv ir(recv);
+
+decode_results res;
+
+void setup() {
+
+  Serial.begin(9600);
+
+  ir.enableIRIn();
+
+}
+
+void loop() {
+
+  if (ir.decode(&res)) {
+
+    Serial.println(res.value, HEX);
+
+    ir.resume();
+
+  }
+
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- 9 MQ Gas -->
+    <section class="card" id="gas">
+      <div class="card-head"><span class="card-desig">GAS1</span><h2 class="card-title">MQ Gas Sensor</h2></div>
+      <p class="card-tagline">Streams a raw analog concentration reading — the starting point before you add your own calibration curve or alarm threshold.</p>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="23" cy="26" r="13" stroke="#6fd8c4" stroke-width="2"/><path d="M23 13 C19 8 26 5 23 2" stroke="#d4a15c" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Sig</b>A0 ← MQ AOUT</div>
+          <div class="pin"><b>Warm‑up</b>~20–60 s before stable</div>
+          <div class="pin"><b>Output</b>raw ADC, 0–1023</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>mq_gas_sensor.ino</span><button class="copy-btn" data-copy="code-gas">Copy</button></div>
+        <pre><code class="language-cpp" id="code-gas">int gasSensor = A0;
+
+void setup() {
+
+  Serial.begin(9600);
+
+}
+
+void loop() {
+
+  int gasValue = analogRead(gasSensor);
+
+  Serial.print("Gas Value: ");
+  Serial.println(gasValue);
+
+  delay(500);
+
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- 10 PIR -->
+    <section class="card" id="pir">
+      <div class="card-head"><span class="card-desig">PIR1</span><h2 class="card-title">PIR Motion Sensor</h2></div>
+      <p class="card-tagline">Flags motion as a simple digital HIGH, lighting an onboard LED and logging the event to serial.</p>
+      <div class="pinout">
+        <div class="icon-cell">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M23 40 A17 17 0 0 1 23 6" stroke="#6fd8c4" stroke-width="2" fill="none"/><path d="M23 32 A9 9 0 0 1 23 14" stroke="#d4a15c" stroke-width="2" fill="none"/><circle cx="23" cy="23" r="3" fill="#6fd8c4"/></svg>
+        </div>
+        <div class="pins">
+          <div class="pin"><b>Sig</b>D7 ← PIR OUT</div>
+          <div class="pin"><b>Indicator</b>D13 → LED</div>
+          <div class="pin"><b>Logic</b>HIGH → motion detected</div>
+        </div>
+      </div>
+      <div class="codewrap">
+        <div class="codebar"><span>pir_motion.ino</span><button class="copy-btn" data-copy="code-pir">Copy</button></div>
+        <pre><code class="language-cpp" id="code-pir">int pir = 7;
+int led = 13;
+
+void setup() {
+
+  pinMode(pir, INPUT);
+  pinMode(led, OUTPUT);
+
+  Serial.begin(9600);
+
+}
+
+void loop() {
+
+  int state = digitalRead(pir);
+
+  if (state == HIGH) {
+
+    digitalWrite(led, HIGH);
+
+    Serial.println("Motion Detected!");
+
+  }
+  else {
+
+    digitalWrite(led, LOW);
+
+  }
+
+  delay(200);
+
+}</code></pre>
+      </div>
+    </section>
+
+    <footer>
+      <span>Arduino Sensor &amp; I/O Library · Rev. B</span>
+      <span>All sketches verified against the standard Arduino core</span>
+    </footer>
+
+  </main>
+</div>
+
+<div class="rail blue"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script>
+  hljs.highlightAll();
+
+  // copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const target = document.getElementById(btn.dataset.copy);
+      if(!target) return;
+      const text = target.innerText;
+      navigator.clipboard.writeText(text).then(()=>{
+        const original = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1600);
+      });
+    });
+  });
+
+  // scroll spy
+  const links = document.querySelectorAll('#bomList a');
+  const sections = Array.from(links).map(a => document.getElementById(a.dataset.target));
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      const link = document.querySelector(`#bomList a[data-target="${entry.target.id}"]`);
+      if(entry.isIntersecting){
+        links.forEach(l=>l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+  sections.forEach(s=> s && observer.observe(s));
+</script>
+</body>
+</html>
