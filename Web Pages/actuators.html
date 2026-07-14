@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Actuators Library</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<style>
+    body{
+    margin:0;
+    background:#0f172a;
+    color:white;
+    font-family:Arial,sans-serif;
+}
+
+header{
+    text-align:center;
+    padding:40px;
+    background:#111827;
+}
+
+.container{
+    width:90%;
+    max-width:1100px;
+    margin:auto;
+}
+
+.card{
+
+    background:#1e293b;
+
+    margin:30px 0;
+
+    padding:25px;
+
+    border-radius:10px;
+}
+
+.card h2{
+    color:#4ade80;
+}
+
+.copy-btn{
+
+    float:right;
+
+    background:#22c55e;
+
+    color:white;
+
+    border:none;
+
+    padding:10px 18px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+}
+
+.copy-btn:hover{
+    background:#16a34a;
+}
+
+pre{
+
+    overflow:auto;
+
+    margin-top:20px;
+
+    border-radius:8px;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Arduino Components Library</h1>
+    <p>Basic Arduino Programs</p>
+</header>
+
+<div class="container">
+
+    <!-- NeoPixel -->
+    <section class="card">
+
+        <h2>11. NeoPixel RGB LED (WS2812B)</h2>
+
+        <button class="copy-btn" onclick="copyCode('neo')">
+            Copy Code
+        </button>
+
+<pre><code id="neo" class="language-cpp">
+#include &lt;Adafruit_NeoPixel.h&gt;
+
+#define LED_PIN 6
+#define NUMPIXELS 2
+
+Adafruit_NeoPixel pixels(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+void setup() {
+  pixels.begin();
+}
+
+void loop() {
+
+  pixels.setPixelColor(0, pixels.Color(255,0,0));
+  pixels.setPixelColor(1, pixels.Color(0,255,0));
+  pixels.show();
+  delay(1000);
+
+  pixels.setPixelColor(0, pixels.Color(0,255,0));
+  pixels.setPixelColor(1, pixels.Color(255,0,0));
+  pixels.show();
+  delay(1000);
+
+  pixels.clear();
+  pixels.show();
+  delay(1000);
+}
+</code></pre>
+
+    </section>
+
+    <!-- Motor Driver -->
+    <section class="card">
+
+        <h2>12. Dual DC Motor Driver (L298N)</h2>
+
+        <button class="copy-btn" onclick="copyCode('motor')">
+            Copy Code
+        </button>
+
+<pre><code id="motor" class="language-cpp">
+// Motor A
+int ENA = 10;
+int IN1 = 8;
+int IN2 = 9;
+
+// Motor B
+int ENB = 11;
+int IN3 = 12;
+int IN4 = 13;
+
+void setup() {
+
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+}
+
+void loop() {
+
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, 255);
+
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENB, 150);
+
+  delay(3000);
+
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+  delay(1000);
+
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, 150);
+
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, 255);
+
+  delay(3000);
+
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+  delay(1000);
+}
+</code></pre>
+
+    </section>
+
+    <!-- Encoder -->
+    <section class="card">
+
+        <h2>13. DC Motor with Encoder</h2>
+
+        <button class="copy-btn" onclick="copyCode('encoder')">
+            Copy Code
+        </button>
+
+<pre><code id="encoder" class="language-cpp">
+const int ENA = 10;
+const int IN1 = 8;
+const int IN2 = 9;
+
+const int encoderA = 2;
+const int encoderB = 3;
+
+volatile long encoderCount = 0;
+
+void readEncoder() {
+
+  if (digitalRead(encoderA) == digitalRead(encoderB))
+    encoderCount++;
+  else
+    encoderCount--;
+}
+
+void setup() {
+
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+
+  pinMode(encoderA, INPUT_PULLUP);
+  pinMode(encoderB, INPUT_PULLUP);
+
+  attachInterrupt(digitalPinToInterrupt(encoderA), readEncoder, CHANGE);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  Serial.println("Forward");
+
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+
+  analogWrite(ENA, 180);
+
+  for (int i = 0; i < 15; i++) {
+
+    Serial.print("Encoder Count = ");
+    Serial.println(encoderCount);
+
+    delay(200);
+  }
+
+  analogWrite(ENA, 0);
+  delay(2000);
+
+  Serial.println("Backward");
+
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+
+  analogWrite(ENA, 180);
+
+  for (int i = 0; i < 15; i++) {
+
+    Serial.print("Encoder Count = ");
+    Serial.println(encoderCount);
+
+    delay(200);
+  }
+
+  analogWrite(ENA, 0);
+
+  delay(2000);
+}
+</code></pre>
+
+    </section>
+
+    <!-- Servo -->
+    <section class="card">
+
+        <h2>14. Servo Motor</h2>
+
+        <button class="copy-btn" onclick="copyCode('servo')">
+            Copy Code
+        </button>
+
+<pre><code id="servo" class="language-cpp">
+#include &lt;Servo.h&gt;
+
+Servo myServo;
+
+void setup() {
+
+  myServo.attach(9);
+}
+
+void loop() {
+
+  myServo.write(0);
+  delay(1000);
+
+  myServo.write(45);
+  delay(1000);
+
+  myServo.write(100);
+  delay(1000);
+
+  myServo.write(30);
+  delay(1000);
+}
+</code></pre>
+
+    </section>
+
+    <!-- Buzzer -->
+    <section class="card">
+
+        <h2>15. Piezo Buzzer</h2>
+
+        <button class="copy-btn" onclick="copyCode('buzzer')">
+            Copy Code
+        </button>
+
+<pre><code id="buzzer" class="language-cpp">
+int buzzer = 8;
+
+void setup() {}
+
+void loop() {
+
+  tone(buzzer,262);
+  delay(300);
+
+  tone(buzzer,294);
+  delay(300);
+
+  tone(buzzer,330);
+  delay(300);
+
+  tone(buzzer,349);
+  delay(300);
+
+  tone(buzzer,392);
+  delay(300);
+
+  noTone(buzzer);
+
+  delay(1000);
+}
+</code></pre>
+
+    </section>
+
+    <!-- 7 Segment -->
+    <section class="card">
+
+        <h2>16. 4-Digit I2C Seven Segment Display</h2>
+
+        <button class="copy-btn" onclick="copyCode('display')">
+            Copy Code
+        </button>
+
+<pre><code id="display" class="language-cpp">
+#include &lt;Wire.h&gt;
+#include &lt;Adafruit_GFX.h&gt;
+#include &lt;Adafruit_LEDBackpack.h&gt;
+
+Adafruit_7segment display = Adafruit_7segment();
+
+void setup() {
+
+  display.begin(0x70);
+}
+
+void loop() {
+
+  display.print(1234);
+  display.writeDisplay();
+  delay(2000);
+
+  display.print(5678);
+  display.writeDisplay();
+  delay(2000);
+
+  display.print(9999);
+  display.writeDisplay();
+  delay(2000);
+}
+</code></pre>
+
+    </section>
+
+</div>
+<script>
+    hljs.highlightAll();
+
+function copyCode(id){
+
+    let code = document.getElementById(id).innerText;
+
+    navigator.clipboard.writeText(code);
+
+    alert("Code Copied!");
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
